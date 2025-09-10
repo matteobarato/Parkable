@@ -1,0 +1,157 @@
+services:
+  # PostgreSQL database with PostGIS extension
+  database:
+    image: postgis/postgis:14-3.2
+    container_name: parking_spots_db
+    environment:
+      POSTGRES_DB: parking_spots_db
+      POSTGRES_USER: parkinguser
+      POSTGRES_PASSWORD: parkingpass123
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - parking_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parkinguser -d parking_spots_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7-alpine
+    container_name: parking_spots_redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - parking_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Flask backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: parking_spots_backend
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=your-super-secret-production-key-change-this
+      - JWT_SECRET_KEY=your-jwt-secret-production-key-change-this
+      - DATABASE_URL=postgresql://parkinguser:parkingpass123@database:5432/parking_spots_db
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "5000:5000"
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - parking_network
+    volumes:
+      - ./backend:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Background scheduler service
+  # scheduler:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.scheduler
+  #   container_name: parking_spots_scheduler
+  #   environment:
+  #     - FLASK_ENV=production
+  #     - SECRET_KEY=your-super-secret-production-key-change-this
+  #     - JWT_SECRET_KEY=your-jwt-secret-production-key-change-this
+  #     - DATABASE_URL=postgresql://parkinguser:parkingpass123@database:5432/parking_spots_db
+  #     - REDIS_URL=redis://redis:6379/0
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  #     backend:
+  #       condition: service_healthy
+  #   networks:
+  #     - parking_network
+  #   volumes:
+  #     - ./backend:/app
+  #   restart: unless-stopped
+
+  # Vue.js frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: parking_spots_frontend
+    environment:
+      - VUE_APP_API_BASE_URL=http://localhost:5000/api
+      - NODE_ENV=production
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - parking_network
+    restart: unless-stopped
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: parking_spots_nginx
+    ports:
+      - "8081:80"
+      # - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - parking_network
+    restart: unless-stopped
+
+  # Database backup service
+  # db_backup:
+  #   image: postgres:14
+  #   container_name: parking_spots_backup
+  #   environment:
+  #     - PGUSER=parkinguser
+  #     - PGPASSWORD=parkingpass123
+  #     - PGHOST=database
+  #     - PGDATABASE=parking_spots_db
+  #   volumes:
+  #     - ./backups:/backups
+  #     - ./scripts/backup.sh:/root/backup.sh
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  #   networks:
+  #     - parking_network
+  #   entrypoint: /root/backup.sh
+  #   restart: "no"
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  parking_network:
+    driver: bridge

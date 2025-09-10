@@ -1,0 +1,13 @@
+numpy
+Werkzeug
+Flask
+Flask-SQLAlchemy
+PyJWT==2.9.0
+Flask-JWT-Extended
+Flask-CORS
+psycopg2-binary
+GeoAlchemy2
+Shapely
+pyproj
+APScheduler
+gunicorn
