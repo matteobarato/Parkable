@@ -1,6 +1,28 @@
 backups/*
 env
 
+# Specifies intentionally untracked files to ignore when using Git
+# http://git-scm.com/docs/gitignore
+
+*.log
+log.txt
+npm-debug.log*
+
+/frontend/.idea
+/frontend/.ionic
+/frontend/.sass-cache
+/frontend/.sourcemaps
+/frontend/.versions
+/frontend/.vscode/*
+!/frontend/.vscode/extensions.json
+/frontend/coverage
+/frontend/dist
+/frontend/node_modules
+/frontend/platforms
+/frontend/plugins
+/frontend/www
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
