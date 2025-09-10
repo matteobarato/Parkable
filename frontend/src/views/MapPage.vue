@@ -656,16 +656,28 @@ onUnmounted(()=>{
 }
 
 .location-overlay {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  right: 16px;
-  z-index: 1000;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  margin: auto;
+  background: #00000099;
 }
 
 .location-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  margin-right: 1em;
+  margin-left: 1em;
+  height: fit-content;
 }
 
 .location-status {
