@@ -105,7 +105,9 @@ import {
   IonInput,
   IonButton,
   IonSpinner,
-  IonToast
+  IonToast,
+  IonCol,
+  IonRow,
 } from '@ionic/vue'
 
 const router = useRouter()

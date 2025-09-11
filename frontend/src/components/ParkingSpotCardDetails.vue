@@ -1,5 +1,6 @@
 <template>
-  <ion-card class="parking-spot-card-details" :class="['parking-spot-card-rank-'+spot.rankTime]" @click="$emit('spot-selected', spot)" button>
+  <ion-card class="parking-spot-card-details" :class="['parking-spot-card-rank-' + spot.rankTime]"
+    @click="$emit('spot-selected', spot)" button>
 
     <ion-card-content>
 
@@ -10,28 +11,41 @@
           </ion-text>
           <ion-card-title>{{ elapsedText }} ago</ion-card-title>
         </ion-item>
-        <ion-item >
-          <ion-text slot="start" color="medium"><Route :size="18" /></ion-text>
+        <ion-item>
+          <ion-text slot="start" color="medium">
+            <Route :size="18" />
+          </ion-text>
           <ion-text color="medium">{{ formattedDistance }}</ion-text>
         </ion-item>
-        <ion-item >
-          <ion-text slot="start" color="medium"><MapPinned :size="18" /></ion-text>
+        <ion-item>
+          <ion-text slot="start" color="medium">
+            <MapPinned :size="18" />
+          </ion-text>
           <ion-text color="medium">{{ formattedCoordinates }}</ion-text>
         </ion-item>
-        <ion-item >
-          <ion-text slot="start" color="medium"><Calendar :size="18" /></ion-text>
+        <ion-item>
+          <ion-text slot="start" color="medium">
+            <Calendar :size="18" />
+          </ion-text>
           <ion-text color="medium">{{ formattedTimestamp }}</ion-text>
         </ion-item>
       </ion-list>
 
-      <div class="flex ion-align-center ion-justify-content-around ion-padding-vertical ion-margin-vertical">
-        <ion-button size="large" class="btn-go" shape="round">
+      <div class="inline-flex">
+        <ion-button expand="block" size="large" class="btn-go" style="flex-grow:1">
           <div class="inline-flex ion-align-items-center">
             <ion-text>Go</ion-text>
             <ArrowRight :size="24" />
           </div>
         </ion-button>
+        <ion-button expand="block" size="large" class="btn-go warning">
+          <div class="inline-flex ion-align-items-center">
+            <Car :size="24" />
+            <Coins :size="24" />
+          </div>
+        </ion-button>
       </div>
+      
     </ion-card-content>
 
   </ion-card>
@@ -47,7 +61,8 @@ import {
   IonText,
   IonList,
   IonCardTitle,
-  IonButton
+  IonButton,
+  IonButtons
 } from '@ionic/vue'
 import {
   MapPin,
@@ -77,7 +92,11 @@ import {
   CircleEllipsis,
   Info,
   Calendar,
-  MapPinned
+  MapPinned,
+  Coins,
+  Pocket,
+  MapPinCheckInside,
+  Car
 } from 'lucide-vue-next'
 import { ellipsisVerticalCircle } from 'ionicons/icons'
 

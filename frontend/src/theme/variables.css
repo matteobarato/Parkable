@@ -32,6 +32,9 @@ http://ionicframework.com/docs/theming/ */
     font-weight: 400;
     font-style: normal;
 } */
+ion-button[expand="block"]{
+    --border-radius: .8em;
+}
 ion-button:not([fill="clear"]) {
     color: var(--ion-color-light);
     --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-tertiary) 70%);
@@ -47,6 +50,11 @@ ion-button.danger{
     --background: linear-gradient(135deg, #f77062 0%, #fe5196 100%);
 }
 
+ion-button.warning{
+    --background: linear-gradient(135deg, #f7cf4d 0%, #fda085 100%);
+    /* linear-gradient(-60deg, #ff5858 0%, #f09819 100%); */
+}
+
 ion-button.btn-credits{
     --background: linear-gradient(135deg, #f7cf4d 0%, #fda085 100%);
     /* linear-gradient(-60deg, #ff5858 0%, #f09819 100%); */
@@ -56,7 +64,7 @@ ion-modal{
     --border-radius: 1.5em;
     --max-height: 75vh;
     --max-width: 90vw;
-
+    --height: auto;
 }
 
 ion-modal.modal-selected-spot-details{
@@ -137,18 +145,25 @@ ion-modal.modal-selected-spot-details{
     margin: 0px;
     width: 100%;
 }
-#map-controls-left{
+#map-controls-right{
+    transition: transform 0.5s cubic-bezier(0, 1, 0, 1);
     width: auto;
     margin: auto;
     margin-right: 0px;
-    margin-bottom: 2em;
+    margin-bottom: 0px;
+    bottom: 1em;
+    right: 1em;
 }
 #map-spots-list{
-    transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);
+    transition: transform 0.5s cubic-bezier(0, 1, 0, 1);
+    transform: translateY(100%);
     overflow: hidden;
     width: 100vw;
     margin: 0px;
     padding: 0px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 10000;
 }
 #map-spots-list.inactive{
     max-height: 0;
@@ -187,4 +202,19 @@ ion-modal.modal-selected-spot-details{
 }
 .parking-spot-card-rank-4 .icon-rank{
     color: var(--ion-color-medium)
+}
+
+ion-card.parking-spot-card-details{
+    display: flex;
+}
+
+ion-card.parking-spot-card-details > ion-card-content{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+ion-card.parking-spot-card-details .btn-go{
+    margin-bottom: 0px;
+    margin-top: auto;
 }

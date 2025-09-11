@@ -322,10 +322,16 @@
           <!-- User Header Card -->
             <ion-card class="history-header-card animate__animated animate__pulse">
               <ion-card-content color="light">
+                
                 <div class="user-header ion-padding-vertical">
-                  <ion-text color="light">
-                      <History :size="36" /><ParkingSquare :size="48" />
-                  </ion-text>
+                  <div class="avatar-container">
+                    <div class="avatar">
+                      <ion-text color="light">
+                          <ScrollText :size="48" />
+                      </ion-text>
+                    </div>
+                  </div>
+                  
                   <ion-text color="light">
                     <h2 style="font-weight: bolder;">Shared Spots</h2>
                   </ion-text>
@@ -406,7 +412,8 @@ import {
   ParkingSquare,
   GalleryHorizontal,
   GalleryHorizontalEnd,
-  History
+  History,
+  ScrollText
 } from 'lucide-vue-next'
 import { refreshOutline } from 'ionicons/icons'
 

@@ -28,30 +28,51 @@
         <ion-button class="btn-credits btn-tr absolute btn-small-padding animate__animated animate__pulse" shape="round">
           {{ authStore.userCredits }}&nbsp;&nbsp;<Coins :size="32" />
         </ion-button>
-        <div id="map-footer" class="absolute btn-br">
-          <div id="map-controls" class="flex ion-align-content-center ion-flex-column ion-justify-content-center animate__animated animate__fadeInUp">
-            <div id="map-controls-left" class="flex ion-align-content-center ion-flex-column ion-justify-content-center">
-            <ion-button @click="isSpotsListOpened = !isSpotsListOpened" class="btn-icon-padd ion-margin" shape="round" color="light">
-              <span class="flex ion-align-items-center"  v-if="!isSpotsListOpened">
-                <ChevronUp :size="16" />
-                <SquareParking :size="24" />
-              </span>
-              <span class="flex ion-align-items-center" v-else>
-                <ChevronDown :size="16" />
-                <SquareParkingOff :size="24" />
-              </span>
-            </ion-button>
-            <ion-button class="btn-icon-padd tertiary" shape="round">
-              <MapPinPlus :size="24" />
-            </ion-button>
-            <ion-button @click="setCenterToCurrentLocation()" class="btn-icon-padd ion-margin" shape="round" color="light">
-              <Locate v-if="!userLocationLoading" :size="36" />
-              <LocateFixed v-else :size="36" />
-            </ion-button>
+        
+        <div id="map-controls-right" class="absolute btn-br flex ion-align-content-center ion-flex-column ion-justify-content-center">
+          <ion-button @click="toggleSpotList()" class="btn-icon-padd ion-margin" shape="round" color="light">
+            <span class="flex ion-align-items-center"  v-if="isSpotsListOpened">
+              <ChevronUp :size="16" />
+              <SquareParking :size="24" />
+            </span>
+            <span class="flex ion-align-items-center" v-else>
+              <ChevronDown :size="16" />
+              <SquareParkingOff :size="24" />
+            </span>
+          </ion-button>
+          <ion-button class="btn-icon-padd tertiary" shape="round">
+            <MapPinPlus :size="24" />
+          </ion-button>
+          <ion-button @click="setCenterToCurrentLocation()" class="btn-icon-padd ion-margin" shape="round" color="light">
+            <Locate v-if="!userLocationLoading" :size="36" />
+            <LocateFixed v-else :size="36" />
+          </ion-button>
+        </div>
+        
+        <!-- <div id="map-footer" class="absolute btn-br"> -->
+          <!-- <div id="map-controls" class="flex ion-align-content-center ion-flex-column ion-justify-content-center animate__animated animate__fadeInUp">
+            <div id="map-controls-right" class="flex ion-align-content-center ion-flex-column ion-justify-content-center">
+              <ion-button @click="isSpotsListOpened = !isSpotsListOpened" class="btn-icon-padd ion-margin" shape="round" color="light">
+                <span class="flex ion-align-items-center"  v-if="!isSpotsListOpened">
+                  <ChevronUp :size="16" />
+                  <SquareParking :size="24" />
+                </span>
+                <span class="flex ion-align-items-center" v-else>
+                  <ChevronDown :size="16" />
+                  <SquareParkingOff :size="24" />
+                </span>
+              </ion-button>
+              <ion-button class="btn-icon-padd tertiary" shape="round">
+                <MapPinPlus :size="24" />
+              </ion-button>
+              <ion-button @click="setCenterToCurrentLocation()" class="btn-icon-padd ion-margin" shape="round" color="light">
+                <Locate v-if="!userLocationLoading" :size="36" />
+                <LocateFixed v-else :size="36" />
+              </ion-button>
             </div>
-          </div>
+          </div> -->
 
-          <div id="map-spots-list" :class="{'active': isSpotsListOpened, 'inactive': !isSpotsListOpened}">
+          <div id="map-spots-list" class="absolute btn-br">
             <!-- Spots List -->
             <div class="spots-list">
               <ParkingSpotCard
@@ -71,7 +92,7 @@
             </div>
           </div>
 
-        </div>
+        <!-- </div> -->
         
         <!-- Map View -->
         <div 
@@ -241,11 +262,14 @@ import {
   IonBadge,
   IonModal,
   IonRefresher,
-  IonRefresherContent
+  IonRefresherContent,
+  IonItem,
 } from '@ionic/vue'
 import ParkingSpotCardDetails from '../components/ParkingSpotCardDetails.vue'
+import { useLocation } from '../services/location.js'
 
 const authStore = useAuthStore()
+const locationService = useLocation()
 
 // Reactive state
 const spots = ref([])
@@ -280,8 +304,6 @@ const showOnlyFresh = ref(false) // spots less than 1 hour old
 const currentPage = ref(1)
 const spotsPerPage = 20
 
-let intervalUpdateUserLocation = null
-
 // Computed properties
 const hasMoreSpots = computed(() => {
   return spots.value.length > currentPage.value * spotsPerPage
@@ -292,7 +314,7 @@ const sortedAndFilteredSpots = computed( () => {
 
   if (userLocation.value && maxDistance.value) {
     filtered = filtered.filter(spot => {
-      const distance = calculateDistance(
+      const distance = locationService.calculateDistance(
         userLocation.value.latitude,
         userLocation.value.longitude,
         spot.latitude,
@@ -338,25 +360,9 @@ const sortedAndFilteredSpots = computed( () => {
   return filtered
 })
 
-// Utility functions
-const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371e3 // Earth's radius in meters
-  const φ1 = lat1 * Math.PI / 180
-  const φ2 = lat2 * Math.PI / 180
-  const Δφ = (lat2 - lat1) * Math.PI / 180
-  const Δλ = (lon2 - lon1) * Math.PI / 180
-
-  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-           Math.cos(φ1) * Math.cos(φ2) *
-           Math.sin(Δλ/2) * Math.sin(Δλ/2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-
-  return R * c
-}
-
 const getSpotDistance = (spot) => {
   if (!userLocation.value) return null
-  return calculateDistance(
+  return locationService.calculateDistance(
     userLocation.value.latitude,
     userLocation.value.longitude,
     spot.latitude,
@@ -381,7 +387,7 @@ const showMessage = (message, color = 'success') => {
 const setCenterToCurrentLocation = async ()=>{
     userLocationLoading.value = true
     try {
-      let location = await getCurrentLocation()
+      let location = await locationService.getCurrentPosition()
       if (location){
         mapCenter.value = {latitude: location.latitude, longitude: location.longitude}
       }
@@ -392,36 +398,12 @@ const setCenterToCurrentLocation = async ()=>{
 
 const requestLocation = async () => {
   try {
-    userLocation.value = await getCurrentLocation()
+    userLocation.value = await locationService.getCurrentPosition()
     mapCenter.value = userLocation.value
     showMessage('Location enabled successfully!', 'success')
   } catch (error) {
     showMessage('Failed to get location. Please check your settings.', 'danger')
   }
-}
-
-const getCurrentLocation = () => {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation not supported'))
-      return
-    }
-    
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        })
-      },
-      (error) => reject(error),
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000
-      }
-    )
-  })
 }
 
 const fetchSpots = async () => {
@@ -577,29 +559,39 @@ const toggleSpotDetailsCard = () => {
   console.log("showSpotDetailsCard:", showSpotDetailsCard.value)
 }
 
+const toggleSpotList = (dry_run=false) => {
+  const map_controls_el = document.querySelector('#map-controls-right')
+  const map_spotlist_el = document.querySelector('#map-spots-list')
+
+  const map_spotlist_el_height = map_spotlist_el.clientHeight
+  if (!dry_run) isSpotsListOpened.value = !isSpotsListOpened.value
+
+  if (isSpotsListOpened.value){
+    map_controls_el.style.transform = `translateY(0px)`
+    map_spotlist_el.style.transform = `translateY(100%)`
+    
+  }else{
+    map_controls_el.style.transform = `translateY(-${map_spotlist_el_height}px)`
+    map_spotlist_el.style.transform = `translateY(0px)`
+  }
+  return isSpotsListOpened.value
+}
+
 // Lifecycle
 onMounted(async () => {
   try {
-    userLocation.value = await getCurrentLocation()
+    userLocation.value = await locationService.getCurrentPosition()
+    locationService.startWatching((locationData)=> userLocation.value = locationData)
   } catch (error) {
     console.warn('Location not available:', error)
   }
-  intervalUpdateUserLocation = setInterval(async ()=>{
-    try {
-      userLocation.value = await getCurrentLocation()
-    } catch (error) {
-      console.warn('Location not available:', error)
-    }
-  }, 1000)
   await fetchSpots()
   await authStore.fetchProfile()
   isLoading.value = false
 })
 
 onUnmounted(()=>{
-  if (intervalUpdateUserLocation) {
-    clearInterval(intervalUpdateUserLocation)
-  }
+  locationService.stopWatching()
 })
 </script>
 
